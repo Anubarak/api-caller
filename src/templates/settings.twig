@@ -1,0 +1,128 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * API Caller  plugin for Craft CMS 3.x
+ *
+ * API Caller  Settings.twig
+ *
+ * @author    Robin Schambach
+ * @copyright Copyright (c) 2018 Robin Schambach
+ * @link      https://www.secondred.de/
+ * @package   ApiCaller
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+<script type="text/javascript">
+    var data = JSON.parse({{ data|json_encode|raw }});
+</script>
+
+<div ng-app="myApp" ng-controller="settings">
+
+    {% set sectionId = (settings['sectionId'] is defined)? settings['sectionId'] : 0 %}
+    {% set folderId = (settings['folderId'] is defined)? settings['folderId'] : 0 %}
+    {% set targetField = (settings['targetField'] is defined)? settings['targetField'] : 0 %}
+
+    {% set sourceField = (settings['sourceField'] is defined)? settings['sourceField'] : 0 %}
+    {% set clientId = (settings['clientId'] is defined)? settings['clientId'] : 0 %}
+
+    <div class="field" id="">
+        <div class="heading">
+            <label id="" for="">Select a section</label>
+            <div class="instructions"><p>select your section.</p>
+            </div>
+        </div>
+        <div class="input ltr">
+            <div class="select">
+                <select
+                        {#ng-options="section as section.name for section in sections track by section.id" ng-model="selected"#}
+                        id="sectionId"
+                        name="sectionId">
+                {% for section in craft.app.getSections().getAllSections() %}
+                    {{ section.id }}
+                    <option {% if sectionId == section.id %}selected{% endif %} value="{{ section.id }}" >{{ section.name }}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    {% set allFields = craft.app.getFields().getAllFields() %}
+
+    <div class="field">
+        <div class="heading">
+            <label>Select your source Field</label>
+            <div class="instructions"><p>select your source Field.</p>
+            </div>
+        </div>
+        <div class="input ltr">
+            <div class="select">
+                <select
+                    id="sourceField"
+                    name="sourceField">
+                    {% for field in allFields %}
+                        <option {% if sourceField == field.handle %}selected{% endif %} value="{{ field.handle }}">{{ field.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="field">
+        <div class="heading">
+            <label>Select your target Field</label>
+            <div class="instructions"><p>select your target Field.</p>
+            </div>
+        </div>
+        <div class="input ltr">
+            <div class="select">
+                <select
+                        id="targetField"
+                        name="targetField">
+                    {% for field in allFields %}
+                        <option {% if targetField == field.handle %}selected{% endif %} value="{{ field.handle }}">{{ field.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+    {% set volumes = craft.app.getVolumes().getAllVolumeIds() %}
+    <div class="field">
+        <div class="heading">
+            <label>Select your folder </label>
+            <div class="instructions"><p>select your folder.</p>
+            </div>
+        </div>
+        <div class="input ltr">
+            <div class="select">
+                <select
+                        id="folderId"
+                        name="folderId">
+                    {% for folder in craft.app.getAssets().getFolderTreeByVolumeIds(volumes) %}
+                        <option {% if folderId == folder.id %}selected{% endif %} value="{{ folder.id }}">{{ folder.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    {{ forms.textField({
+        label: 'Client Id',
+        instructions: 'Enter your client ID.',
+        id: 'clientId',
+        name: 'clientId',
+        value: settings['clientId']?? ''})
+    }}
+
+    <div class="field">
+        <div class="heading">
+            <label>Start the Task</label>
+            <div class="instructions"><p>Start the Task with the selected options.</p>
+            </div>
+        </div>
+        <div class="input ltr">
+            <button type="button" id="start-queue" class="btn submit">Start</button>
+        </div>
+    </div>
+</div>

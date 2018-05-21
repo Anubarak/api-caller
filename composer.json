@@ -1,0 +1,43 @@
+{
+    "name": "secondred/api-caller",
+    "description": "A Plugin to call APIs",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "api caller "
+    ],
+    "support": {
+        "docs": "https://github.com/Anubarak/api-caller/blob/master/README.md",
+        "issues": "https://github.com/Anubarak/api-caller/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Robin Schambach",
+            "homepage": "https://www.secondred.de/"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "^3.0.0-RC1"
+    },
+    "autoload": {
+        "psr-4": {
+          "secondred\\apicaller\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "API Caller ",
+        "handle": "api-caller",
+        "hasCpSettings": true,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/Anubarak/api-caller/master/CHANGELOG.md",
+        "components": {
+            "apiCallerService": "secondred\\apicaller\\services\\ApiCallerService"
+        },
+        "class": "secondred\\apicaller\\ApiCaller"
+    }
+}
