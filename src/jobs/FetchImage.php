@@ -96,7 +96,7 @@ class FetchImage extends BaseJob
             foreach ($query->each() as $element) {
                 $this->setProgress($queue, $currentElement++ / $totalElements);
                 $field = $element->getFieldValue($settings->sourceField);
-                $assetId = ApiCaller::$plugin->getService()->fetchImage($criteria, $field, $element->title, $settings);
+                $assetId = ApiCaller::$plugin->getService()->fetchImage($field, $element, $settings);
                 if($assetId){
                     $element->setFieldValue($settings->targetField, [$assetId]);
                     if (!Craft::$app->getElements()->saveElement($element)) {

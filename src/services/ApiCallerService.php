@@ -10,6 +10,7 @@
 
 namespace secondred\apicaller\services;
 
+use craft\base\Element;
 use craft\elements\Entry;
 use craft\helpers\Assets;
 use craft\helpers\FileHelper;
@@ -41,7 +42,12 @@ class ApiCallerService extends Component
     // =========================================================================
     /**
      * @param array $criteria
+     * @param null $settings
      * @return mixed
+     * @throws \Throwable
+     * @throws \craft\errors\ElementNotFoundException
+     * @throws \yii\base\ErrorException
+     * @throws \yii\base\Exception
      */
     public function fetchImages($criteria = [], $settings = null)
     {
@@ -53,7 +59,7 @@ class ApiCallerService extends Component
         Craft::configure($query, $criteria);
         foreach($query->all() as $entry){
             $field = $entry->getFieldValue($settings->sourceField);
-            $assetId = $this->fetchImage($criteria, $field, $entry->title, $settings);
+            $assetId = $this->fetchImage($field, $entry, $settings);
             if($assetId){
                 $entry->setFieldValue($settings->targetField, [$assetId]);
                 Craft::$app->getElements()->saveElement($entry);
@@ -64,9 +70,8 @@ class ApiCallerService extends Component
     }
 
     /**
-     * @param $criteria
      * @param $domain
-     * @param $fileName
+     * @param $company Element
      * @param null $settings
      * @return int|null|string
      * @throws \Throwable
@@ -74,7 +79,7 @@ class ApiCallerService extends Component
      * @throws \yii\base\ErrorException
      * @throws \yii\base\Exception
      */
-    public function fetchImage($criteria, $domain, $fileName, $settings = null){
+    public function fetchImage($domain, $company, $settings = null){
         if($settings === null){
             $settings = ApiCaller::$plugin->getSettings();
         }
@@ -90,10 +95,10 @@ class ApiCallerService extends Component
         curl_close($ch);
 
         if($info['content_type'] === 'image/png'){
-            $fileName = str_replace('.', '', $fileName);
+            $fileName =  $company->id;
             $path = Craft::$app->getPath()->getTempPath() . DIRECTORY_SEPARATOR . $fileName . '.png';
             FileHelper::writeToFile($path, $output);
-            $assetId = $this->uploadImage($path, $fileName, $settings);
+            $assetId = $this->uploadImage($path, $company, $settings);
 
             return $assetId;
         }else{
@@ -105,19 +110,20 @@ class ApiCallerService extends Component
 
     /**
      * @param $path
-     * @param $fileName
+     * @param $company Element
      * @param $settings
      * @return int|null|string
      * @throws \Throwable
      * @throws \craft\errors\ElementNotFoundException
      * @throws \yii\base\Exception
      */
-    public function uploadImage($path, $fileName, $settings){
+    public function uploadImage($path, $company, $settings){
         $folder = $this->getFolder($settings);
 
         $asset = new \craft\elements\Asset();
         $asset->tempFilePath = $path;
-        $asset->filename = $fileName . '.png';
+        $asset->filename = $company->id . '.png';
+        $asset->title = $company->title;
         $asset->newFolderId = $folder->id;
         $asset->volumeId = $folder->volumeId;
         $asset->avoidFilenameConflicts = true;
@@ -125,18 +131,13 @@ class ApiCallerService extends Component
 
         $result = Craft::$app->getElements()->saveElement($asset);
 
-        // In case of error, let user know about it.
-        if(!$result){
-            $errors = $asset->getFirstErrors();
-            echo("<pre>");
-            var_dump($asset->getErrors());
-            echo("</pre>");
-            //return Craft::t('app', "Failed to save the Asset:\n") . implode(";\n", $errors);
-        }
-
-        return $asset->hasErrors() === false? $asset->id : false;
+        return $asset->hasErrors() === false && $result? $asset->id : false;
     }
 
+    /**
+     * @param $settings
+     * @return \craft\models\VolumeFolder|null
+     */
     public function getFolder($settings){
         if($this->_folder === null){
             $this->_folder = Craft::$app->getAssets()->findFolder(['id' => $settings->folderId]);

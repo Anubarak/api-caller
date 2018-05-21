@@ -60,11 +60,14 @@ class DefaultController extends Controller
      */
     public function actionIndex()
     {
-        $settings = Craft::$app->getRequest()->getBodyParam('settings');
+        $settings = Craft::$app->getRequest()->getBodyParam('settings', []);
+
         $criteria = [];
         $criteria[$settings['targetField']] = ':empty:';
         $criteria[$settings['sourceField']] = ':notempty:';
         $criteria['sectionId'] = $settings['sectionId'];
+
+        // start the job
         Craft::$app->getQueue()->push(new FetchImage([
             'criteria'  => $criteria,
             'settings'  => (object)$settings
