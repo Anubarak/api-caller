@@ -14,6 +14,7 @@ use craft\db\QueryAbortedException;
 use craft\elements\db\EntryQuery;
 use craft\elements\Entry;
 use craft\errors\ElementNotFoundException;
+use craft\helpers\App;
 use secondred\apicaller\ApiCaller;
 
 use Craft;
@@ -100,6 +101,7 @@ class FetchImage extends BaseJob
                 if($assetId){
                     $element->setFieldValue($settings->targetField, [$assetId]);
                     if (!Craft::$app->getElements()->saveElement($element)) {
+                        Craft::error('[API CALLER] Couldn’t save element '.$element->id);
                         //throw new Exception('Couldn’t save element '.$element->id.' ('.get_class($element).') due to validation errors.');
                     }
                 }

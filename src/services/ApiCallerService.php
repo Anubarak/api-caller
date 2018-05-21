@@ -102,7 +102,7 @@ class ApiCallerService extends Component
 
             return $assetId;
         }else{
-            Craft::error('[API CALLER] Could not find valid image ' . $output);
+            Craft::error('[API CALLER] Could not find valid image for path ' . $domain . ' ' . $output);
 
             return false;
         }
