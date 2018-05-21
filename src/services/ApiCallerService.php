@@ -102,7 +102,7 @@ class ApiCallerService extends Component
 
             return $assetId;
         }else{
-            $json = Json::decode($output);
+            Craft::error('[API CALLER] Could not find valid image ' . $output);
 
             return false;
         }
@@ -129,7 +129,9 @@ class ApiCallerService extends Component
         $asset->avoidFilenameConflicts = true;
         $asset->setScenario(\craft\elements\Asset::SCENARIO_CREATE);
 
-        $result = Craft::$app->getElements()->saveElement($asset);
+        if(!$result = Craft::$app->getElements()->saveElement($asset)){
+            Craft::error('[API CALLER] Could not store image ' . Json::encode($asset->getErrors()));
+        }
 
         return $asset->hasErrors() === false && $result? $asset->id : false;
     }

@@ -80,7 +80,7 @@
                 <select
                         id="targetField"
                         name="targetField">
-                    {% for field in allFields %}
+                    {% for field in allFields if className(field) == 'craft\\fields\\Assets'%}
                         <option {% if targetField == field.handle %}selected{% endif %} value="{{ field.handle }}">{{ field.name }}</option>
                     {% endfor %}
                 </select>
